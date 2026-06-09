@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Осетинский Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Ossetian</title>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -11,22 +12,113 @@
 
 <body>
 
-<h1>Угадай перевод</h1>
+<!-- Splash -->
 
-<h2 id="word">Загрузка...</h2>
+<div id="splash-screen">
 
-<div id="answers"></div>
+    <div class="splash-content">
 
-<p id="result"></p>
+        <div class="logo">
+            🟣
+        </div>
 
-<p>Очки: <span id="score">0</span></p>
+        <h1>Learn Ossetian</h1>
 
-<button onclick="loadWord()">Следующее слово</button>
+        <p>Изучай осетинский язык</p>
 
-<button onclick="finishGame()">Завершить игру</button>
+        <div class="loader"></div>
 
-<h3>🏆 Лидерборд</h3>
-<div id="board"></div>
+    </div>
+
+</div>
+
+<!-- MENU -->
+
+<div id="menu-screen" class="screen">
+
+    <div class="menu-card">
+
+        <h1>Осетинский язык</h1>
+
+        <p>
+            Выберите режим обучения
+        </p>
+
+        <button id="wordModeBtn" class="menu-btn">
+            📖 Угадай слово
+        </button>
+
+        <button id="sentenceModeBtn" class="menu-btn">
+            💬 Угадай предложение
+        </button>
+
+    </div>
+
+</div>
+
+<!-- GAME -->
+
+<div id="game-screen" class="screen" style="display:none;">
+
+    <div class="container">
+
+        <div class="top-card">
+
+            <div class="stat">
+                <span>Очки</span>
+                <strong id="score">0</strong>
+            </div>
+
+            <div class="stat">
+                <span>Режим</span>
+                <strong id="gameMode">Слова</strong>
+            </div>
+
+        </div>
+
+        <div class="word-card">
+
+            <div class="label">
+                Русский
+            </div>
+
+            <h1 id="word">
+                Загрузка...
+            </h1>
+
+        </div>
+
+        <div class="subtitle">
+            Выбери правильный перевод
+        </div>
+
+        <div id="answers"></div>
+
+        <div id="result"></div>
+
+        <div class="buttons">
+
+            <button id="backBtn" class="secondary-btn">
+                ← В меню
+            </button>
+
+            <button onclick="finishGame()" class="primary-btn">
+                Завершить игру
+            </button>
+
+        </div>
+
+        <div class="leaderboard-card">
+
+            <h3>🏆 Лидерборд</h3>
+
+            <div id="board"></div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <script src="/static/app.js"></script>
 
