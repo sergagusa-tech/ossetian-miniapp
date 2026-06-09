@@ -31,37 +31,29 @@ window.addEventListener("load", () => {
 // MENU
 // ------------------
 
-document.addEventListener("DOMContentLoaded", () => {
+setTimeout(() => {
 
-    document
-        .getElementById("wordModeBtn")
-        .addEventListener("click", () => {
+    document.getElementById("wordModeBtn").onclick = () => {
 
-            currentMode = "word";
+        currentMode = "word";
 
-            document.getElementById("gameMode").innerText =
-                "Слова";
+        document.getElementById("gameMode").innerText = "Слова";
 
-            startGame();
-        });
+        startGame();
+    };
 
-    document
-        .getElementById("sentenceModeBtn")
-        .addEventListener("click", () => {
+    document.getElementById("sentenceModeBtn").onclick = () => {
 
-            currentMode = "sentence";
+        currentMode = "sentence";
 
-            document.getElementById("gameMode").innerText =
-                "Фразы";
+        document.getElementById("gameMode").innerText = "Фразы";
 
-            startGame();
-        });
+        startGame();
+    };
 
-    document
-        .getElementById("backBtn")
-        .addEventListener("click", showMenu);
+    document.getElementById("backBtn").onclick = showMenu;
 
-});
+}, 100);
 
 // ------------------
 // START GAME
