@@ -5,7 +5,7 @@ if (tg) {
     tg.expand();
 }
 
-alert("APP START");
+// alert("APP START");
 
 let score = 0;
 let correctAnswer = "";
