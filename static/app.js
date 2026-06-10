@@ -12,6 +12,12 @@ let correctAnswer = "";
 let answered = false;
 let currentMode = "word";
 
+let streak = 0;
+let lives = 3;
+let level = 1;
+let timer = 10;
+let timerInterval = null;
+
 // ------------------
 // SPLASH + MENU
 // ------------------
@@ -64,6 +70,41 @@ function startGame() {
     loadQuestion();
 
     loadLeaderboard();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timer = 10;
+
+    timerInterval = setInterval(() => {
+        timer--;
+
+        document.getElementById("timer").innerText = timer;
+
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            handleWrong("⏰ Время вышло!");
+        }
+    }, 1000);
+}
+
+function handleWrong(message) {
+    if (answered) return;
+    answered = true;
+
+    streak = 0;
+    lives--;
+
+    document.getElementById("result").innerText = message;
+
+    tg?.HapticFeedback?.notificationOccurred("error");
+
+    if (lives <= 0) {
+        finishGame();
+        return;
+    }
+
+    setTimeout(loadQuestion, 1200);
 }
 
 // ------------------
@@ -127,7 +168,11 @@ async function loadQuestion() {
         });
 
         document.getElementById("result").innerText = "";
+                // ✔ обновляем интерфейс
+                updateUI();
 
+                // ✔ запускаем таймер нового вопроса
+                startTimer();
     } catch (err) {
 
         console.error(err);
@@ -137,64 +182,87 @@ async function loadQuestion() {
     }
 }
 
+function showExplanation(correct) {
+    const el = document.getElementById("result");
+
+    el.innerHTML = `
+        ❌ Неправильно<br>
+        ✅ Правильный ответ: ${correct}
+    `;
+}
+
+function checkDailyReward() {
+    const last = localStorage.getItem("lastReward");
+    const today = new Date().toDateString();
+
+    if (last !== today) {
+        score += 3;
+
+        localStorage.setItem("lastReward", today);
+
+        alert("🎁 Ежедневный бонус +3 очка!");
+    }
+}
+
+function updateUI() {
+    document.getElementById("score").innerText = score;
+    document.getElementById("lives").innerText = lives;
+    document.getElementById("streak").innerText = streak;
+}
+
+function gameOver() {
+    document.getElementById("result").innerHTML = `
+        💀 Игра окончена<br>
+        🏆 Очки: ${score}
+    `;
+}
+
 // ------------------
 // CHECK ANSWER
 // ------------------
 
 function checkAnswer(answer) {
-
+    tg?.HapticFeedback?.impactOccurred("light"); 
     if (answered) return;
-
     answered = true;
 
-    const buttons =
-        document.querySelectorAll(".answer-btn");
+    clearInterval(timerInterval);
+
+    const buttons = document.querySelectorAll(".answer-btn");
 
     buttons.forEach(btn => {
-
-        const text =
-            btn.querySelector("span").innerText;
+        const text = btn.querySelector("span").innerText;
 
         if (text === correctAnswer) {
-
             btn.classList.add("correct");
-
         } else {
-
             btn.classList.add("dimmed");
         }
 
-        if (
-            text === answer &&
-            answer !== correctAnswer
-        ) {
-
-            btn.classList.remove("dimmed");
-
+        if (text === answer && answer !== correctAnswer) {
             btn.classList.add("wrong");
+            btn.classList.remove("dimmed");
         }
     });
 
     if (answer === correctAnswer) {
-
+        tg?.HapticFeedback?.notificationOccurred("success");
         score++;
+        streak++;
 
-        document.getElementById("score").innerText =
-            score;
+        if (streak % 5 === 0) level++;
 
-        document.getElementById("result").innerText =
-            "✅ Правильно";
+        document.getElementById("score").innerText = score;
 
-        setTimeout(() => {
+        document.getElementById("result").innerText = "✅ Правильно";
 
-            loadQuestion();
+        tg?.HapticFeedback?.notificationOccurred("success");
 
-        }, 1200);
+        setTimeout(loadQuestion, 1000);
 
     } else {
-
-        document.getElementById("result").innerText =
-            `❌ Правильный ответ: ${correctAnswer}`;
+        tg?.HapticFeedback?.notificationOccurred("error");
+        handleWrong(`❌ Правильно: ${correctAnswer}`);
     }
 }
 
@@ -267,8 +335,7 @@ async function loadLeaderboard() {
             const div =
                 document.createElement("div");
 
-            div.innerText =
-                `${i + 1}. ${u.tg_id} — ${u.best_score}`;
+            div.innerText = `${i + 1}. ${u.username || "User"} — ${u.best_score}`;
 
             board.appendChild(div);
         });
@@ -277,4 +344,10 @@ async function loadLeaderboard() {
 
         console.error(err);
     }
+
+    setTimeout(() => {
+    const splash = document.getElementById("splash-screen");
+    if (splash) splash.remove();
+                    }, 3000);
+
 }
