@@ -289,16 +289,51 @@ def get_sentence():
 @app.post("/save_score")
 def save_score(data: dict):
 
-    tg_id = str(data["tg_id"])
-    score = int(data["score"])
+    # данные от фронта
+    tg_id = str(data.get("tg_id", "0"))
+    score = int(data.get("score", 0))
+    username = data.get("username", "")
+    photo = data.get("photo", "")
 
     conn = get_connection()
     cur = conn.cursor()
 
+    # ищем пользователя
     cur.execute(
         "SELECT * FROM users WHERE tg_id=?",
         (tg_id,)
     )
+
+    user = cur.fetchone()
+
+    if user:
+
+        best = max(user["best_score"], score)
+
+        cur.execute(
+            """
+            UPDATE users
+            SET score=?, best_score=?, username=?, photo=?
+            WHERE tg_id=?
+            """,
+            (score, best, username, photo, tg_id)
+        )
+
+    else:
+
+        cur.execute(
+            """
+            INSERT INTO users
+            (tg_id, score, best_score, username, photo)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (tg_id, score, score, username, photo)
+        )
+
+    conn.commit()
+    conn.close()
+
+    return {"status": "ok"}
 
     user = cur.fetchone()
 

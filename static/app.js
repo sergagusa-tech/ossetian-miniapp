@@ -12,7 +12,7 @@ let correctAnswer = "";
 let answered = false;
 let currentMode = "word";
 
-let streak = 0;
+
 let lives = 3;
 let level = 1;
 let timer = 10;
@@ -89,22 +89,24 @@ function startTimer() {
 }
 
 function handleWrong(message) {
-    if (answered) return;
-    answered = true;
 
-    streak = 0;
+    streak = 0; // если ещё используешь
     lives--;
 
     document.getElementById("result").innerText = message;
 
     tg?.HapticFeedback?.notificationOccurred("error");
 
+    updateUI();
+
     if (lives <= 0) {
         finishGame();
         return;
     }
 
-    setTimeout(loadQuestion, 1200);
+    setTimeout(() => {
+        loadQuestion();
+    }, 1200);
 }
 
 // ------------------
@@ -207,7 +209,6 @@ function checkDailyReward() {
 function updateUI() {
     document.getElementById("score").innerText = score;
     document.getElementById("lives").innerText = lives;
-    document.getElementById("streak").innerText = streak;
 }
 
 function gameOver() {
@@ -246,19 +247,16 @@ function checkAnswer(answer) {
     });
 
     if (answer === correctAnswer) {
-        tg?.HapticFeedback?.notificationOccurred("success");
-        score++;
-        streak++;
+    tg?.HapticFeedback?.notificationOccurred("success");
 
-        if (streak % 5 === 0) level++;
+    score++;
 
-        document.getElementById("score").innerText = score;
+    document.getElementById("score").innerText = score;
 
-        document.getElementById("result").innerText = "✅ Правильно";
+    document.getElementById("result").innerText = "✅ Правильно";
 
-        tg?.HapticFeedback?.notificationOccurred("success");
+    setTimeout(loadQuestion, 1000);
 
-        setTimeout(loadQuestion, 1000);
 
     } else {
         tg?.HapticFeedback?.notificationOccurred("error");
@@ -271,42 +269,32 @@ function checkAnswer(answer) {
 // ------------------
 
 async function finishGame() {
-
     try {
 
-        let tg_id =
-            tg?.initDataUnsafe?.user?.id || "0";
+        const user = tg?.initDataUnsafe?.user;
 
         await fetch("/save_score", {
-
             method: "POST",
-
             headers: {
                 "Content-Type": "application/json"
             },
-
             body: JSON.stringify({
-                tg_id: tg_id,
+                tg_id: user?.id || "0",
+                username: user?.username || user?.first_name || "User",
                 score: score
             })
         });
 
-        if (tg) {
-
-            tg.sendData(
-                JSON.stringify({
-                    score: score
-                })
-            );
-        }
-
         await loadLeaderboard();
 
         document.getElementById("result").innerText =
-            `🏆 Очков: ${score}`;
+            `💀 Игра окончена\n🏆 Очков: ${score}`;
+
+        setTimeout(() => {
+            showMenu();
+        }, 2000);
 
     } catch (err) {
-
         console.error(err);
     }
 }
